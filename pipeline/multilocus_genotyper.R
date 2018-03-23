@@ -1,0 +1,7 @@
+source("strvntr_genotyping_functions.R")
+args <- commandArgs(TRUE)
+input <- toString(args[1])
+output <- toString(args[2])
+tab_ds <- read.delim(toString(input),header=T)
+tab_ds <- PureRepeatCounter(my_dataset=tab_ds,output=tab_ds,start=1,end=nrow(tab_ds),multicounts=T)
+write.table(tab_ds,toString(output),sep="\t",quote=F,row.names=F)

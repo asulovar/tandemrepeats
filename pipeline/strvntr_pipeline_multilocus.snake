@@ -1,0 +1,73 @@
+##############################
+####Arvis Sulovari Ph.D.######
+#####STR/VNTR genotyping######
+##########01/18/2018##########
+##############################
+
+import os
+
+if config == {}:
+    configfile: "strvntr_pipeline.json"
+
+HAPLOTYPE_FILE = config["samples"]
+DATA_DIR = config["fasta_dir"]
+RANGES_FILE = config["ranges"]
+
+#Read in each haplotype names (11 total)
+HAPLOTYPES = []
+with open(HAPLOTYPE_FILE) as f:
+    HAPLOTYPES = f.read().splitlines()
+    print(HAPLOTYPES)
+
+RANGES = []
+with open(RANGES_FILE) as f:
+    RANGES = f.read().splitlines()
+    print(RANGES)
+
+
+#Expand name of haplotype files
+rule all:
+    input: expand("{haplotype}.{range}.tab", haplotype = HAPLOTYPES, range = RANGES),expand("{haplotype}.{range}.tab.mlg", haplotype = HAPLOTYPES, range = RANGES),expand("{range}.final.tab", range = RANGES)
+    params: sge_opts="-l mfree=4G,gpfs=0 -N rule_all" 
+
+
+#rule Merger:
+#    input: "HG00514.h0.{range}.tab.mlg","HG00514.h1.{range}.tab.mlg","HG00733.h0.{range}.tab.mlg","HG00733.h1.{range}.tab.mlg","NA19240.h0.{range}.tab.mlg","NA19240.h1.{range}.tab.mlg"
+#    output: "{range}.final.tab"
+#    log: "log/{range}.merge.log"
+#    params: sge_opts="-l mfree=2G,gpfs=0 -N Merge"
+#    shell: """
+#    module purge
+#    module load modules modules-init modules-gs mpc/0.8.2 mpfr/3.1.0 gmp/5.0.2 gcc/4.9.1 R/3.4.0
+#
+#    Rscript merge_final_output_files.R {wildcards.range}
+#    """
+
+
+rule MultiLocusGenotyper:
+    input: "{haplotype}.{range}.tab"
+    output: "{haplotype}.{range}.tab.mlg"
+    log: "log/{haplotype}.{range}.MLG.log"
+    params: sge_opts="-l mfree=2G,gpfs=0 -N MultiLocGeno"
+    shell: """
+    module purge
+    module load modules modules-init modules-gs mpc/0.8.2 mpfr/3.1.0 gmp/5.0.2 gcc/4.9.1 R/3.4.0
+
+    Rscript multilocus_genotyper.R {input} {output}
+    """
+
+
+rule PureRep_finder:
+    #input: "{haplotype}","{range}"
+    output: "{haplotype}.{range}.tab"
+    log: "log/{haplotype}.{range}.PureRep.log"
+    params: sge_opts="-l mfree=2G,gpfs=0 -N pure_rep" 
+    shell: """
+    module purge
+    module load modules modules-init modules-gs mpc/0.8.2 mpfr/3.1.0 gmp/5.0.2 gcc/4.9.1 R/3.4.0
+
+    Rscript str_vntr_genotyper.R {wildcards.haplotype} {wildcards.range}
+    
+    cp {wildcards.haplotype}.{wildcards.range}.tab {wildcards.haplotype}/
+    """
+
