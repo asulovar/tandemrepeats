@@ -1,3 +1,6 @@
+#Author: Arvis Sulovari, PhD
+#Main functions required to detect and count repeat units of arbitrary length in FASTA records.   
+
 require(seqinr)
 require(Biostrings)
 require(stringr)
@@ -94,7 +97,6 @@ PureRepeatCounter <- function(my_dataset=my_arr,output=out_arr,start=1,end=10,mu
   }
   return(output[start:end,])
 }
-
 
 
 

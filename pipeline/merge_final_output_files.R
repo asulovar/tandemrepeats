@@ -1,4 +1,4 @@
-#ONLY required arg should be the region number
+#ONLY required arg is the region number
 args <- commandArgs(TRUE)
 myregion <- as.integer(args[1])
 

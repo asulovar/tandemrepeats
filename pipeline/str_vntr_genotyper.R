@@ -1,3 +1,6 @@
+#Author: Arvis Sulovari, PhD
+#Main functions required to (i) detect and (ii) count repeat units of arbitrary length in FASTA records.   
+
 require(seqinr)
 require(Biostrings)
 require(stringr)
@@ -133,19 +136,13 @@ multiSeq_motif_finder <- function(fasta_input=yor_hsa){
   return(na.omit(tmp_out))
 }
 
-
-
-
-
 #Add parameter for region that needs to be extracted
 args <- commandArgs(TRUE)
 haplotype <- toString(args[1])
 region <- as.integer(args[2])
 tmp_seq <- eval(as.name(paste0(haplotype)))[region]
 #write.fasta(sequences=tmp_seq,names=names(tmp_seq),file.out=paste0(haplotype,".",region,".fasta"))
-
 slice_output <- multiSeq_motif_finder(fasta_input = tmp_seq)
-
 write.table(slice_output,paste0(haplotype,".",region,".tab"),sep="\t",quote=F,row.names=F)
 
 #write.fasta(sequences=tmp_seq,names=names(tmp_seq),file.out=paste0(haplotype,".",region,".fasta"))
